@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1141,7 +1141,7 @@ renderNews();
       </div>
       <div class="auth-panel" id="auth-panel-2">
         <div class="phone-step active" id="phone-step-1">
-          <div class="auth-field"><label>Phone Number</label><input type="tel" id="auth-phone" placeholder="+91 98765 43210"></div>
+          <div class="auth-field"><label>Phone Number</label><input type="tel" id="auth-phone" placeholder="e.g. 9876543210 or +919876543210"></div>
           <div id="recaptcha-container"></div>
           <button class="auth-btn" onclick="sendOTP()">Send OTP</button>
         </div>
@@ -1319,8 +1319,16 @@ function setupRecaptcha(){
   }catch(e){console.log('reCAPTCHA setup:',e);}
 }
 async function sendOTP(){
-  const phone=document.getElementById('auth-phone').value.trim();
+  let phone=document.getElementById('auth-phone').value.trim();
   if(!phone){showAuthError('Please enter your phone number');return;}
+  // Auto-format to E.164: strip spaces, dashes, dots
+  phone=phone.replace(/[\s\-\.\(\)]/g,'');
+  // If user entered 10-digit Indian number without country code, add +91
+  if(/^\d{10}$/.test(phone)) phone='+91'+phone;
+  // If starts with 91 but no +, add +
+  if(/^91\d{10}$/.test(phone)) phone='+'+phone;
+  // Ensure starts with +
+  if(!phone.startsWith('+')) phone='+'+phone;
   try{
     clearAuthError();
     confirmationResult=await auth.signInWithPhoneNumber(phone,recaptchaVerifier);
