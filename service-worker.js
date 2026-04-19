@@ -1,6 +1,7 @@
 const CACHE_NAME = 'sfi-kar-cache-v1';
 const urlsToCache = [
-  './SFI_Karnataka_Full.html',
+  './',
+  './index.html',
   './manifest.json'
 ];
 
