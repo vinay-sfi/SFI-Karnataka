@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>  
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Federation of India — Karnataka</title>
 <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#d32f2f">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -283,12 +284,36 @@ nav{position:sticky;top:0;z-index:200;background:var(--red-dark);border-bottom:3
 .edit-success.show{display:block;}
 
 /* RESPONSIVE */
+@media(max-width:850px){
+  .nav-inner { flex-wrap: wrap; height: auto; padding: 0.8rem 1.5rem; justify-content: center; gap: 0.8rem; }
+  .logo { margin-bottom: 0.5rem; }
+  .nav-auth { position: absolute; right: 1.5rem; top: 1rem; }
+  .nav-user-wrap { position: absolute; right: 1.5rem; top: 1rem; }
+  .nav-dropdown { right: -10px; }
+  .nav-links { width: 100%; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch; justify-content: flex-start; }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-links a { white-space: nowrap; padding: 0 0.8rem; height: 40px; }
+}
 @media(max-width:760px){
   .two-col,.reg-layout,.contact-grid,.leaders-grid{grid-template-columns:1fr;}
   .form-row{grid-template-columns:1fr;}
   .hero-stats{gap:1.5rem;}
-  .nav-links a{padding:0 0.55rem;font-size:0.72rem;}
+  .hero h1{font-size: 2.2rem;}
   .detail-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;}
+  .profile-details{grid-template-columns:1fr;}
+  .auth-header, .edit-header { padding: 1.2rem 1.5rem 0; }
+  .auth-body, .edit-body { padding: 1.2rem 1.5rem 1.5rem; }
+  .auth-tabs { margin: 1rem 1.5rem 0; }
+}
+@media(max-width:480px){
+  .hero h1{font-size: 1.8rem;}
+  .stitle{font-size: 1.6rem;}
+  .detail-stats-row{grid-template-columns:1fr; text-align: left;}
+  .ds{border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 10px 20px;}
+  .ds:last-child{border-bottom: none;}
+  .detail-title{font-size: 1.6rem;}
+  .edit-row{grid-template-columns: 1fr;}
+  .nav-auth-btn { padding: 0.3rem 0.8rem; font-size: 0.75rem; }
 }
 </style>
 </head>
@@ -1473,6 +1498,56 @@ async function saveProfile(){
     alert('Error saving: '+err.message);
   }
 }
+
+// ====== PWA SERVICE WORKER & INSTALL PROMPT ======
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => console.log('Service Worker registered', reg))
+      .catch(err => console.log('Service Worker registration failed', err));
+  });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('pwa-install-banner').style.display = 'flex';
+});
+
+function installPWA() {
+  document.getElementById('pwa-install-banner').style.display = 'none';
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      deferredPrompt = null;
+    });
+  }
+}
+
+function dismissPWA() {
+  document.getElementById('pwa-install-banner').style.display = 'none';
+}
+
+window.addEventListener('appinstalled', (evt) => {
+  document.getElementById('pwa-install-banner').style.display = 'none';
+});
 </script>
+
+<!-- PWA Install Banner -->
+<div id="pwa-install-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#fff; padding:14px 20px; box-shadow:0 -4px 20px rgba(0,0,0,0.15); z-index:9999; align-items:center; justify-content:space-between; border-top:3px solid var(--red);">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div style="width:42px; height:42px; background:var(--red-dark); border-radius:8px; display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Playfair Display',serif; font-weight:900; font-size:1.2rem;">SFI</div>
+    <div>
+      <div style="font-weight:700; color:var(--text); font-size:0.95rem;">SFI Karnataka</div>
+      <div style="font-size:0.75rem; color:var(--muted);">Install App for quick access</div>
+    </div>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <button onclick="dismissPWA()" style="background:transparent; border:none; color:var(--muted); font-size:0.8rem; padding:8px; cursor:pointer; font-weight:600;">LATER</button>
+    <button onclick="installPWA()" style="background:var(--red); color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:0.85rem; font-weight:700; cursor:pointer; box-shadow:0 4px 10px rgba(204,27,27,0.3);">INSTALL</button>
+  </div>
+</div>
+
 </body>
 </html>
